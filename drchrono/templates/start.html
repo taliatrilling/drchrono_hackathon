@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid">
+
+		<h1>Daily Appointment Overviews:</h1>
+
+		{% for doctor in doctors %}
+			{% for key, value in doctor.items %}
+				<h3><a href="/appts/{{ key }}">Dr. {{ value }}</a></h3>
+			{% endfor %}
+		{% endfor %}
+
+		<h1>Patient Check-in Kiosk</h1>
+		<h3>Please note that for privacy purposes, after this option is selected, you will need to reauthorize the application to access doctor appointment overviews</h3>
+
+	</div>
+
+{% endblock %}

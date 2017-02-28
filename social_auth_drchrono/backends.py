@@ -17,7 +17,13 @@ class drchronoOAuth2(BaseOAuth2):
         ('refresh_token', 'refresh_token'),
         ('expires_in', 'expires_in')
     ]
-    # TODO: setup proper token refreshing
+    
+    def get_refresh_token(self, response):
+        """ 
+        Return refresh token for drchrono account
+        """
+
+        return response.get(refresh_token)
 
     def get_user_details(self, response):
         """

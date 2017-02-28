@@ -1,8 +1,14 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <a href="{% url 'social:begin' 'drchrono' %}">
-      drchrono OAuth
-    </a>
-  </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}drchrono OAuth{% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid">
+		<h1>drchrono Check-in Kiosk App</h1>
+		<h2>Please authorize access to your patient scheduling and chart functionality below:</h2>
+	  <a id='auth' class='btn btn-primary btn-lg' href='{% url 'social:begin' 'drchrono' %}'> <span class='glyphicon glyphicon-log-in' aria-hidden='true'></span>  drchrono OAuth</a><br><br>
+	  <a class='btn btn-primary btn-lg' href='https://www.drchrono.com/'><span class='glyphicon glyphicon-home' aria-hidden='true'></span>  drchrono Home</a>
+	</div>
+	
+{% endblock %}

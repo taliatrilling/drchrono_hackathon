@@ -113,6 +113,6 @@ STATIC_URL = '/static/'
 
 SOCIAL_AUTH_DRCHRONO_KEY = os.environ['SOCIAL_AUTH_DRCHRONO_KEY']
 SOCIAL_AUTH_DRCHRONO_SECRET = os.environ['SOCIAL_AUTH_DRCHRONO_SECRET']
-SOCIAL_AUTH_DRCHRONO_SCOPE = ['patients:summary:read']
+SOCIAL_AUTH_DRCHRONO_SCOPE = ['user:read patients:summary:read patients:summary:write calendar:read']
 
-# LOGIN_REDIRECT_URL = 
+LOGIN_REDIRECT_URL = '/start'
