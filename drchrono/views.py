@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from django.views.generic.base import TemplateView
 
@@ -8,9 +8,9 @@ import requests
 
 from .forms import CheckInForm
 
-from datetime import datetime
+from .logic import authenticate, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_request_headers, get_todays_patients_for_doctor
 
-from .logic import authenticate, get_name_from_patient_id
+from .models import CheckIn
 
 
 def start(request):
@@ -22,73 +22,49 @@ def start(request):
 	if not drchrono_login:
 		return render(request, 'error.html')
 
-	access_token_auth = 'Bearer ' + str(drchrono_login.access_token)
-	headers = {'Authorization': access_token_auth}
-	doctors_url = 'https://drchrono.com/api/doctors'
-	data = requests.get(doctors_url, headers=headers)
-	d = data.json()
-	doctors = []
-	for entry in d['results']:
-		doc_dict = {}
-		doc_dict[int(entry['id'])] = str(entry['last_name'])
-		doctors.append(doc_dict)
+	doctors = get_doctors_for_practice(access_token)
 	context = {'doctors': doctors, 'drchrono_login': drchrono_login}
 	return render(request, 'start.html', context)
 
 
 def check_in(request):
-	""" """
+	"""View for patient check-in"""
+
 	drchrono_login = authenticate(request)
 	if not drchrono_login:
 		return render(request, 'error.html')
 	return render(request, 'check_in.html')
 
 def checked_in(request):
-	""" """
+	"""Processes patient check-in, redirects to check-in home if patient credentials incorrect"""
 
 	if request.method == 'POST':
 		form = CheckInForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data
+			patient = get_patient_obj_from_id(patient_id, access_token)
+			office_id = get_office_id_for_doctor(access_token)
+			# doctor_id = 
+			appt_id = get_appt_id_for_patient_today(patient_id, office_id, doctor_id, access_token)
+			check_in_obj = CheckIn(patient_id=patient['id'], )
 			return render(request, 'update_chart.html', context=data)
-	return render(request, 'error.html')
+	#error message about credentials being incorrect
+	return redirect('/check-in')
 
 def appt_overview(request, doctor_id):
-	""" """
+	"""Appointment overview for doctors to view the day's appts as well as wait times"""
 
 	drchrono_login = authenticate(request)
 	if not drchrono_login:
 		return render(request, 'error.html')
-	access_token = str(drchrono_login.access_token)
-	access_token_auth = 'Bearer ' + access_token
-	headers = {'Authorization': access_token_auth}
-	today = datetime.now().date().strftime('%Y-%m-%d')
-	offices_url = 'https://drchrono.com/api/offices'
-	office_response = (requests.get(offices_url, headers=headers)).json()
-	office_id = office_response['results'][0]['id']
-	appts_url = 'https://drchrono.com/api/appointments'
-	data = {
-		'doctor': doctor_id,
-		'date': today,
-		'office': office_id,
-	}
-	r = (requests.get(appts_url, params=data, headers=headers)).json()
-	appts = []
-	for entry in r['results']:
-		patient_dict = {}
-		patient_dict['time'] = entry['scheduled_time']
-		patient_dict['duration'] = entry['duration']
-		patient_dict['room'] = entry['exam_room']
-		patient_id = entry['patient']
-		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
-		#reflect waittimes based on check in
-		appts.append(patient_dict)
-	print appts
+	headers = get_request_headers(drchrono_login.access_token)
+	office_id = get_office_id_for_practice(drchrono_login.access_token)
+	appts = get_todays_patients_for_doctor(doctor_id, drchrono_login.access_token)
 	context = {'appts': appts}	
 	return render(request, 'appt_overview.html', context)
 
 def update_chart(request):
-	""" """
+	"""Landing page for patients following check-in to see if their chart needs to be updated"""
 
 	return render(request, 'update_chart.html')
 
