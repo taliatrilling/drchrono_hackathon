@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Check-In{% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid">
+
+		<h1>Patient Check-In</h1>
+		<form action="/checked-in" method="POST">
+			{% csrf_token %}
+			<label>Please enter your information below to check in for your appointment</label><br>
+			<label>First name:</label>
+			<input type="text" name="first_name"><br>
+			<label>Last name:</label>
+			<input type="text" name="last_name"><br>
+			<label>Date of birth:</label>
+			<input type="date" name="dob"><br>
+			<input type="submit" value="Check In">
+
+		</form>
+
+	</div>
+
+{% endblock %}

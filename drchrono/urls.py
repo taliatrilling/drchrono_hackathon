@@ -12,4 +12,12 @@ urlpatterns = [
     url(r'start', views.start, name='start'),
 
     url(r'^appts/(?P<doctor_id>[0-9]+)/$', views.appt_overview, name='appts'),
+ 	
+ 	url(r'check-in', views.check_in, name='check-in'),
+
+ 	url(r'checked-in', views.checked_in, name='checked-in'),
+
+ 	url(r'update-chart', views.update_chart, name='update-chart'),
 ]
+
+
