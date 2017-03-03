@@ -4,6 +4,8 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from datetime import datetime
 
+from .models import CheckIn
+
 def authenticate(request):
 	"""Authentication"""
 	
@@ -119,7 +121,10 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_id = entry['patient']
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
 		patient_dict['appt_id'] = entry['id']
-		#reflect waittimes based on check in: need to fetch check-in instance
+		patient_dict['checkin'] = CheckIn.objects.all()
+		if patient_dict['checkin'] is None:
+			patient_dict['checkin'] = []
+		print patient_dict
 		appts.append(patient_dict)
 	return appts
 

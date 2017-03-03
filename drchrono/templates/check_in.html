@@ -10,13 +10,7 @@
 		<form action="/checked-in" method="POST">
 			<label>Please enter your information below to check in for your appointment</label><br>
 			{% csrf_token %}
-<!-- 			{{ form.as_p }} -->
-			<label>First name:</label>
-			<input type="text" name="first_name"><br>
-			<label>Last name:</label>
-			<input type="text" name="last_name"><br>
-			<label>Date of birth:</label>
-			<input type="date" name="dob"><br>
+			{{ form.as_p }}
 			<input type="submit" value="Check In">
 
 		</form>

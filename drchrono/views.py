@@ -6,7 +6,11 @@ from django.template import Context
 
 import requests
 
+from django.utils import timezone
+
 from datetime import datetime
+
+import pytz
 
 from .forms import CheckInForm
 
@@ -59,6 +63,7 @@ def checked_in(request):
 			appt_time = appt['scheduled_time'] #indices to actually get time?
 			check_in_obj = CheckIn(patient_id=patient_id, doctor_id=doctor_id, check_in_time=datetime.now(),
 			appt_time=appt_time)
+			check_in_obj.save()
 			return render(request, 'update_chart.html', context=data)
 	#error message if credentials are incorrect
 	return redirect('/check-in')
