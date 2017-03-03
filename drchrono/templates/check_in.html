@@ -8,8 +8,9 @@
 
 		<h1>Patient Check-In</h1>
 		<form action="/checked-in" method="POST">
-			{% csrf_token %}
 			<label>Please enter your information below to check in for your appointment</label><br>
+			{% csrf_token %}
+<!-- 			{{ form.as_p }} -->
 			<label>First name:</label>
 			<input type="text" name="first_name"><br>
 			<label>Last name:</label>

@@ -45,19 +45,6 @@ def get_patient_obj_from_id(patient_id, access_token):
 		if int(entry['id']) == int(patient_id):
 			return entry
 
-def get_appt_id_for_patient_today(patient_id, access_token):
-	"""For a patient id, return appt id for an appt scheduled for today"""
-
-	today = datetime.now().date().strftime('%Y-%m-%d')
-	access_token_auth = 'Bearer ' + access_token
-	headers = {'Authorization': access_token_auth}
-	appts_url = 'https://drchrono.com/api/appointments'
-	data = {'doctor': doctor_id}
-	r = (requests.get(appts_url, params=data, headers=headers)).json()
-	for entry in r['results']:
-		if entry['patient'] == patient_id:
-			return entry['id']
-
 def get_office_id_for_practice(access_token):
 	"""For a practice that has granted the application access, return the office id"""
 
@@ -70,25 +57,28 @@ def get_office_id_for_practice(access_token):
 	office_id = office_response['results'][0]['id']
 	return office_id
 
-def get_appt_obj(access_token, patient_id):
+def get_appt_obj(patient_id, access_token):
 	"""For a patient id, get the full appt object for their appt scheduled for today"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
-	access_token_auth = 'Bearer ' + access_token
-	headers = {'Authorization': access_token_auth}
+	headers = get_request_headers(access_token)
 	appts_url = 'https://drchrono.com/api/appointments' 
 	data = {'date': today}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
 	for entry in r['results']:
-		if entry['patient'] == patient_id:
-			return entry
+		return entry
+
+def get_appt_id_for_patient_today(patient_id, access_token):
+	"""For a patient id, return appt id for an appt scheduled for today"""
+
+	obj = get_appt_obj(patient_id, access_token)
+	return obj['id']
 
 def get_doctor_id_from_appt(appt_id, access_token):
 	"""For a given appt id, return the id of the doctor who is scheduled to attend to that appt"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
-	access_token_auth = 'Bearer ' + access_token
-	headers = {'Authorization': access_token_auth}
+	headers = get_request_headers(access_token)
 	appts_url = 'https://drchrono.com/api/appointments' 
 	data = {'date': today}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
@@ -139,6 +129,8 @@ def get_patient_id_from_name_dob(fname, lname, dob, access_token):
 	headers = get_request_headers(access_token)
 	patients_url = 'https://drchrono.com/api/patients_summary'
 	data = {'first_name':fname, 'last_name':lname, 'date_of_birth':dob} 
-	r = (requests.get(patients_url, parms=data, headers=headers)).json()
-	return r['results']['id']
+	r = (requests.get(patients_url, params=data, headers=headers)).json()
+	if r['results'] == []:
+		return None
+	return r['results'][0]['id']
 
