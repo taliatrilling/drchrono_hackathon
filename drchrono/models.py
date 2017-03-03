@@ -10,7 +10,7 @@ class CheckIn(models.Model):
 	"""For a given doctor, if a patient has checked in and what time they did so 
 	(to calculate patient time waiting)"""
 
-	patient_id = models.IntegerField()
+	appt_id = models.IntegerField()
 	doctor_id = models.IntegerField()
 	check_in_time = models.DateTimeField()
 	appt_time = models.DateTimeField()
@@ -27,7 +27,8 @@ class Visit(models.Model):
 
 	appt_id = models.IntegerField()
 	seen_at = models.DateTimeField()
-	appt_time = models.DateTimeField()
+	checked_in_at = models.DateTimeField()
+	doctor_id = models.IntegerField(default=123272)
 
 	def __str__(self):
 		western = timezone('US/Pacific')

@@ -6,13 +6,18 @@ from django.template import Context
 
 import requests
 
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import pytz
+
+from pytz import timezone
 
 from .forms import CheckInForm, SeeingPatient
 
 from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob
 
 from .models import CheckIn, Visit
+
 
 
 def start(request):
@@ -93,6 +98,7 @@ def update_chart(request):
 	"""Landing page for patients following check-in to see if their chart needs to be updated"""
 
 	return render(request, 'update_chart.html')
+
 
 
 

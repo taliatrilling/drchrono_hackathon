@@ -3,3 +3,7 @@
 	font-size: 30px;
 	background-color: #41A328;
 }
+
+.urgent {
+	color: red;
+}

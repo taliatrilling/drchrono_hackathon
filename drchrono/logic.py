@@ -144,5 +144,3 @@ def get_patient_id_from_name_dob(fname, lname, dob, access_token):
 		return None
 	return r['results'][0]['id']
 
-
-
