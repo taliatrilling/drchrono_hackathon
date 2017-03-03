@@ -9,7 +9,7 @@
 		<h1>Today's Agenda</h1>
 			{% load drchrono_extras %}
 			{% for appt in appts %}
-			<form action="/appt/{{ doctor_id }}" method="POST">
+			<form action="/appt/{{ appt.doctor }}" method="POST">
 				{% csrf_token %}
 				Patient name: {{ appt.name }}<br>
 				Appointment scheduled for: {{ appt.time|slice:"11:" }}<br>
@@ -28,13 +28,13 @@
 						This patient has been waiting for {{ appt.checkin|calculate_wait_time }} minutes
 					{% endif %}
 					<input type="hidden" name="time_seen" value="{% now 'c' %}" readonly="readonly">
-					<input type="hidden" name="appt_time" value="{{ appt.time }}" readonly="readonly">
+					<input type="hidden" name="time_checked_in" value="{{ appt.checkin }}" readonly="readonly">
 					<input type="hidden" name="appt_id" value="{{ appt.appt_id }}" readonly="readonly">
 					<br><input type="submit" value="I am starting this appointment">
 				{% endif %}
 			{% endfor %}
 		</form>
-		<h1>Today's average wait time for patients is: INSERT</h1>
+		<h1>Today's average wait time for patients is: {{ doctor|get_today_avg_waittime }}</h1>
 
 
 	</div>

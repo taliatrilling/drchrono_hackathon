@@ -62,9 +62,9 @@ def checked_in(request):
 				return redirect('/check-in') ## error message: no appt today?
 			appt_time = appt['scheduled_time'] #indices to actually get time?
 			today = datetime.now().date().strftime('%Y-%m-%d')
-			if CheckIn.objects.all().filter(appt_time__icontains=today, patient_id=patient_id):
+			if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt_id):
 				return redirect('/check-in') #message that you've already checked in 
-			check_in_obj = CheckIn(patient_id=patient_id, doctor_id=doctor_id, check_in_time=datetime.now(),
+			check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=datetime.now(),
 			appt_time=appt_time)
 			check_in_obj.save()
 			return render(request, 'update_chart.html', context=data)
@@ -83,15 +83,15 @@ def appt_overview(request, doctor_id):
 		if form.is_valid():
 			data = form.cleaned_data
 			actual_time = data['time']
-			appt_time = data['appt_time']
+			checked_in_at = data['time_checked_in']
 			appt_id = data['appt_id']
-			visit_obj = Visit(appt_id=appt_id, seen_at=actual_time, appt_time=appt_time)
+			visit_obj = Visit(appt_id=appt_id, seen_at=actual_time, checked_in_at=checked_in_at, doctor_id=doctor_id)
 			visit_obj.save()
 			return render(request, 'appts' + str(doctor_id))
 	headers = get_request_headers(drchrono_login.access_token)
 	office_id = get_office_id_for_practice(drchrono_login.access_token)
 	appts = get_todays_patients_for_doctor(doctor_id, drchrono_login.access_token)
-	context = {'appts': appts}	
+	context = {'appts': appts, 'doctor': doctor_id}	
 	return render(request, 'appt_overview.html', context)
 
 def update_chart(request):
