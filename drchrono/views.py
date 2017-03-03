@@ -79,15 +79,23 @@ def appt_overview(request, doctor_id):
 	if not drchrono_login:
 		return render(request, 'error.html')
 	if request.method == 'POST':
-		form = SeeingPatient(request.POST)
+		form = SeeingPatient(data=request.POST)
+		print form.errors
 		if form.is_valid():
 			data = form.cleaned_data
-			actual_time = data['time']
-			checked_in_at = data['time_checked_in']
+			actual_time = data['seen_at']
+			checked_in_not_formatted = data['checked_in_at']
+			checked_in_not_formatted = checked_in_not_formatted[0:20]
+			if checked_in_not_formatted[7] == ',':
+				checked_in_not_formatted = checked_in_not_formatted[0:6] + '0' + checked_in_not_formatted[6:]
+			if checked_in_not_formatted[16] == ':':
+				checked_in_not_formatted = checked_in_not_formatted[0:16] + '0' + checked_in_not_formatted[16:]
+			checked_in_at = datetime.strptime(checked_in_not_formatted, '%B %d, %Y, %I:%M')
+			checked_in_at = pytz.utc.localize(checked_in_at)
 			appt_id = data['appt_id']
 			visit_obj = Visit(appt_id=appt_id, seen_at=actual_time, checked_in_at=checked_in_at, doctor_id=doctor_id)
 			visit_obj.save()
-			return render(request, 'appts' + str(doctor_id))
+			return redirect('/appts/' + str(doctor_id))
 	headers = get_request_headers(drchrono_login.access_token)
 	office_id = get_office_id_for_practice(drchrono_login.access_token)
 	appts = get_todays_patients_for_doctor(doctor_id, drchrono_login.access_token)

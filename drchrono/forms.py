@@ -7,5 +7,7 @@ class CheckInForm(forms.Form):
 	dob = forms.DateField(label='Date of Birth:')
 
 class SeeingPatient(forms.Form):
-	time = forms.CharField(widget=forms.HiddenInput())
+	seen_at = forms.CharField(widget=forms.HiddenInput())
 	appt_id = forms.CharField(widget=forms.HiddenInput())
+	checked_in_at = forms.CharField(widget=forms.HiddenInput())
+	doctor_id = forms.CharField(widget=forms.HiddenInput())

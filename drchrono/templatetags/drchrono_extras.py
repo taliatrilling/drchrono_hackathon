@@ -29,6 +29,8 @@ def get_today_avg_waittime(doctor_id):
 	appts_seen = []
 	for patient in patients_already_seen:
 		wait = patient.seen_at - patient.checked_in_at 
+		print patient.seen_at
+		print patient.checked_in_at
 		waittimes.append(wait)
 		appts_seen.append(patient.appt_id)
 	for patient in patients_waiting:
@@ -43,8 +45,8 @@ def get_today_avg_waittime(doctor_id):
 	print waittimes
 	for wait in waittimes:
 		total = total + wait
-	print len(waittimes)
-	avg = str(total/(len(waittimes)))
-	return avg[0] + ' hours, ' + avg[2:4] + ' minutes'
+	avg = total/(len(waittimes))
+	time = int((avg.total_seconds())/60)
+	return time
 
 

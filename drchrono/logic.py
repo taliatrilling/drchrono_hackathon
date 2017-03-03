@@ -113,13 +113,16 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 	data = {'doctor': doctor_id, 'date': today, 'office': office_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
 	patients_already_seen = Visit.objects.all().filter(checked_in_at__icontains=today)
-	print patients_already_seen
+	seen_ids = []
 	appts = []
+	for p in patients_already_seen:
+			seen_ids.append(int(p.appt_id))
 	for entry in r['results']:
 		patient_dict = {}
-		if entry['id'] in patients_already_seen:
+		if int(entry['id']) in seen_ids:
 			continue
 		patient_dict['appt_id'] = entry['id']
+		print patient_dict['appt_id']
 		patient_dict['time'] = entry['scheduled_time']
 		patient_dict['duration'] = entry['duration']
 		patient_dict['room'] = entry['exam_room']
@@ -127,7 +130,7 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
 		patient_dict['appt_id'] = entry['id']
 		patient_dict['doctor'] = entry['doctor']
-		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today)
+		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=patient_dict['appt_id'])
 		if patient_dict['checkin'] is None:
 			patient_dict['checkin'] = []
 		appts.append(patient_dict)
