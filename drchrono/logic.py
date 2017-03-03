@@ -4,7 +4,7 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from datetime import datetime
 
-from .models import CheckIn
+from .models import CheckIn, Visit
 
 def authenticate(request):
 	"""Authentication"""
@@ -112,16 +112,21 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 	office_id = get_office_id_for_practice(access_token)
 	data = {'doctor': doctor_id, 'date': today, 'office': office_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
+	patients_already_seen = Visit.objects.all().filter(appt_time__icontains=today)
+	print patients_already_seen
 	appts = []
 	for entry in r['results']:
 		patient_dict = {}
+		if entry['id'] in patients_already_seen:
+			continue
+		patient_dict['appt_id'] = entry['id']
 		patient_dict['time'] = entry['scheduled_time']
 		patient_dict['duration'] = entry['duration']
 		patient_dict['room'] = entry['exam_room']
 		patient_id = entry['patient']
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
 		patient_dict['appt_id'] = entry['id']
-		patient_dict['checkin'] = CheckIn.objects.all()
+		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today)
 		if patient_dict['checkin'] is None:
 			patient_dict['checkin'] = []
 		print patient_dict
@@ -138,4 +143,6 @@ def get_patient_id_from_name_dob(fname, lname, dob, access_token):
 	if r['results'] == []:
 		return None
 	return r['results'][0]['id']
+
+
 

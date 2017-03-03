@@ -20,4 +20,16 @@ class CheckIn(models.Model):
 		tz_aware = self.check_in_time.astimezone(western)
 		return tz_aware.strftime("%X")
 
-		
+
+class Visit(models.Model):
+	"""Records when a doctor indicates that they are about to see a patient, used to generate average wait times
+	as well as remove patients from the day's agenda"""
+
+	appt_id = models.IntegerField()
+	seen_at = models.DateTimeField()
+	appt_time = models.DateTimeField()
+
+	def __str__(self):
+		western = timezone('US/Pacific')
+		tz_aware = self.seen_at.astimezone(western)
+		return tz_aware.strftime("%X")

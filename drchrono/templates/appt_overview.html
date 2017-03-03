@@ -6,11 +6,31 @@
 
 	<div class="container-fluid">
 
+		<h1>Today's Agenda</h1>
+		<form action="/appt/{{ doctor_id }}" method="POST">
+			{% for appt in appts %}
+				Patient name: {{ appt.name }}<br>
+				Appointment scheduled for: {{ appt.time|slice:"11:" }}<br>
+				Appointment duration: {{ appt.duration }} minutes<br>
+				
+				{% if appt.scheduled_room|length != 0 %}
+					Scheduled room: {{ appt.scheduled_room }}<br>
+				{% endif %}
 
-		{% for appt in appts %}
-			{{ appt.name }}
-			{{ appt.checkin }}
-		{% endfor %}
+				{% if appt.checkin|length == 0 %}
+					This patient has not checked in yet
+				{% else %}
+					{{ appt.checkin }}
+					MESSAGE ABOUT HOW LONG WAIT HAS BEEN/COLOR INDICATING SEVERITY
+					{% csrf token %}
+					<input type="hidden" name="time_seen" value="{% now 'c' %}" readonly="readonly">
+					<input type="hidden" name="appt_time" value="{{ appt.time }}" readonly="readonly">
+					<input type="hidden" name="appt_id" value="{{ appt.appt_id }}" readonly="readonly">
+					<br><input type="submit" value="I am about to see this patient">
+				{% endif %}
+			{% endfor %}
+		</form>
+		<h1>Today's average wait time for patients is: INSERT</h1>
 
 
 	</div>
