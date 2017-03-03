@@ -45,18 +45,14 @@ def get_patient_obj_from_id(patient_id, access_token):
 		if int(entry['id']) == int(patient_id):
 			return entry
 
-def get_appt_id_for_patient_today(patient_id, office_id, doctor_id, access_token):
+def get_appt_id_for_patient_today(patient_id, access_token):
 	"""For a patient id, return appt id for an appt scheduled for today"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
 	access_token_auth = 'Bearer ' + access_token
 	headers = {'Authorization': access_token_auth}
 	appts_url = 'https://drchrono.com/api/appointments'
-	data = {
-		'doctor': doctor_id,
-		'date': today,
-		'office': office_id,
-	}
+	data = {'doctor': doctor_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
 	for entry in r['results']:
 		if entry['patient'] == patient_id:
@@ -108,7 +104,7 @@ def get_doctors_for_practice(access_token):
 	doctors_url = 'https://drchrono.com/api/doctors'
 	data = (requests.get(doctors_url, headers=headers)).json()
 	doctors = []
-	for entry in d['results']:
+	for entry in data['results']:
 		doc_dict = {}
 		doc_dict[int(entry['id'])] = str(entry['last_name'])
 		doctors.append(doc_dict)
@@ -122,11 +118,7 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 	headers = get_request_headers(access_token)
 	appts_url = 'https://drchrono.com/api/appointments'
 	office_id = get_office_id_for_practice(access_token)
-	data = {
-		'doctor': doctor_id,
-		'date': today,
-		'office': office_id,
-	}
+	data = {'doctor': doctor_id, 'date': today, 'office': office_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
 	appts = []
 	for entry in r['results']:
@@ -137,11 +129,16 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_id = entry['patient']
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
 		patient_dict['appt_id'] = entry['id']
-		#reflect waittimes based on check in
+		#reflect waittimes based on check in: need to fetch check-in instance
 		appts.append(patient_dict)
 	return appts
 
-
-
-
+def get_patient_id_from_name_dob(fname, lname, dob, access_token):
+	"""For a given first name, last name and DOB, return the patient_id or None if inputs invalid"""
+	
+	headers = get_request_headers(access_token)
+	patients_url = 'https://drchrono.com/api/patients_summary'
+	data = {'first_name':fname, 'last_name':lname, 'date_of_birth':dob} 
+	r = (requests.get(patients_url, parms=data, headers=headers)).json()
+	return r['results']['id']
 

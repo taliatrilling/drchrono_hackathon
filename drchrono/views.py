@@ -6,9 +6,11 @@ from django.template import Context
 
 import requests
 
+from datetime import datetime
+
 from .forms import CheckInForm
 
-from .logic import authenticate, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_request_headers, get_todays_patients_for_doctor
+from .logic import authenticate, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_request_headers, get_todays_patients_for_doctor, get_patient_id_from_name_dob
 
 from .models import CheckIn
 
@@ -22,7 +24,7 @@ def start(request):
 	if not drchrono_login:
 		return render(request, 'error.html')
 
-	doctors = get_doctors_for_practice(access_token)
+	doctors = get_doctors_for_practice(drchrono_login.access_token)
 	context = {'doctors': doctors, 'drchrono_login': drchrono_login}
 	return render(request, 'start.html', context)
 
@@ -42,13 +44,15 @@ def checked_in(request):
 		form = CheckInForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data
-			patient = get_patient_obj_from_id(patient_id, access_token)
-			office_id = get_office_id_for_doctor(access_token)
-			# doctor_id = 
-			appt_id = get_appt_id_for_patient_today(patient_id, office_id, doctor_id, access_token)
-			check_in_obj = CheckIn(patient_id=patient['id'], )
+			patient_id = get_patient_id_from_name_dob(fname, lname, dob, access_token)
+			office_id = get_office_id_for_doctor(drchrono_login.access_token)
+			appt_id = get_appt_id_for_patient_today(patient_id, drchrono_login.access_token)
+			doctor_id = get_doctor_id_from_appt(appt_id, drchrono_login.access_token)
+			appt_time = get_appt_obj(drchrono_login.access_token, patient_id)['scheduled_time'] #indices to actually get time?
+			check_in_obj = CheckIn(patient_id=patient['id'], doctor_id=doctor_id, check_in_time=datetime.now(),
+			appt_time=appt_time)
 			return render(request, 'update_chart.html', context=data)
-	#error message about credentials being incorrect
+	#error message if credentials are incorrect
 	return redirect('/check-in')
 
 def appt_overview(request, doctor_id):

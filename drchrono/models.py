@@ -6,7 +6,7 @@ class CheckIn(models.Model):
 
 	patient_id = models.IntegerField()
 	doctor_id = models.IntegerField()
-	check_in_time = models.DateTimeField(auto_now = True)
+	check_in_time = models.DateTimeField()
 	appt_time = models.DateTimeField()
 
 	def __str__(self):
