@@ -10,12 +10,13 @@
 
 		{% for doctor in doctors %}
 			{% for key, value in doctor.items %}
-				<h3><a href="/appts/{{ key }}">Dr. {{ value }}</a></h3>
+				<h2><a href="/appts/{{ key }}">Dr. {{ value }}</a></h2>
 			{% endfor %}
 		{% endfor %}
 
-		<h1><a href="/check-in">Patient Check-in Kiosk</a></h1>
-		<h3>Please note that for privacy purposes, after this option is selected, you will need to reauthorize the application to access doctor appointment overviews</h3>
+
+		<h1>Patient Services:</h1>
+		<a class='btn btn-primary btn-lg' href="/check-in">Patient Check-in Kiosk</a>
 
 	</div>
 

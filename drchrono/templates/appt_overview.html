@@ -33,6 +33,7 @@
 					<input type="hidden" name="doctor_id" value="{{ appt.doctor }}" readonly="readonly">
 					<br><input type="submit" value="I am starting this appointment">
 				{% endif %}
+				<br><br>
 			{% endfor %}
 		</form>
 		<h1>Today's average wait time for patients is: {{ doctor|get_today_avg_waittime }} minutes</h1>

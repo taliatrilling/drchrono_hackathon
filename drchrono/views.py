@@ -128,6 +128,7 @@ def updated_chart(request):
 	""" """
 
 	pass
+	
 	# drchrono_login = authenticate(request)
 	# if not drchrono_login:
 	# 	return render(request, 'error.html')
