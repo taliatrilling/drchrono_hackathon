@@ -14,7 +14,7 @@ from pytz import timezone
 
 from .forms import CheckInForm, SeeingPatient
 
-from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob
+from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info
 
 from .models import CheckIn, Visit
 
@@ -55,8 +55,11 @@ def checked_in(request):
 			if patient_id is None:
 				return redirect('/check-in') #error message
 			office_id = get_office_id_for_practice(drchrono_login.access_token)
+			if get_appt_id_for_patient_today(patient_id, drchrono_login.access_token) is None:
+				return redirect('/check-in') #don't have an appt today
 			appt_id = get_appt_id_for_patient_today(patient_id, drchrono_login.access_token)
 			doctor_id = get_doctor_id_from_appt(appt_id, drchrono_login.access_token)
+			data['doctor_id'] = doctor_id
 			appt = get_appt_obj(patient_id, drchrono_login.access_token)
 			if appt is None:
 				return redirect('/check-in') ## error message: no appt today?
@@ -64,10 +67,11 @@ def checked_in(request):
 			today = datetime.now().date().strftime('%Y-%m-%d')
 			if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt_id):
 				return redirect('/check-in') #message that you've already checked in 
-			check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=datetime.now(),
+			check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
 			appt_time=appt_time)
 			check_in_obj.save()
-			return render(request, 'update_chart.html', context=data)
+			info = {'stats': get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token), 'first_name': data['first_name']}
+			return render(request, 'update_chart.html', context=info)
 	#error message if credentials are incorrect
 	return redirect('/check-in')
 
@@ -79,8 +83,7 @@ def appt_overview(request, doctor_id):
 	if not drchrono_login:
 		return render(request, 'error.html')
 	if request.method == 'POST':
-		form = SeeingPatient(data=request.POST)
-		print form.errors
+		form = SeeingPatient(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data
 			actual_time = data['seen_at']
@@ -105,7 +108,32 @@ def appt_overview(request, doctor_id):
 def update_chart(request):
 	"""Landing page for patients following check-in to see if their chart needs to be updated"""
 
-	return render(request, 'update_chart.html')
+	drchrono_login = authenticate(request)
+	if not drchrono_login:
+		return render(request, 'error.html')
+	first_name = data['first_name']
+	last_name = data['last_name']
+	date_of_birth = data['dob']
+	doctor_id = data['doctor_id']
+	access_token = drchrono_login.access_token
+	info = get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token)
+	print info
+	return render(request, 'update_chart.html', context=info)
+
+def updated_chart(request):
+	""" """
+
+	pass
+	# drchrono_login = authenticate(request)
+	# if not drchrono_login:
+	# 	return render(request, 'error.html')
+	# if request.method == 'POST':
+	# 	form = UpdateInfo(request.POST)
+	# 	if form.is_valid():
+	# 		data = form.cleaned_data
+	# 		for k, v in data.items():
+	# 			if v == 'Not on File':
+	# 				continue
 
 
 

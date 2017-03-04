@@ -8,7 +8,22 @@
 
 		<h1>You have been successfully checked in, {{ first_name }}. Please review your chart information below to see if any of your information needs to be updated.</h1>
 
+		<form action="/updated-chart" method="POST">
+		<h3>{% for k, v in stats.items %}
+			{% if v == '' %}
+				{{ k }}:  
+				<textarea rows="1" cols="100" name="{{ k }}">Not on File </textarea><br>
+			{% else %}
+				{{ k }}:
+				<textarea rows="1" cols="100" name="{{ k }}">{{ v }} </textarea><br>
+			{% endif %}
+		
+		{% endfor %}</h3>
 
+		<label>What is the primary reason for your visit?</label><br>
+		<textarea rows="3" cols="100" name="reason"></textarea><br>
+
+		<input type="submit">
 	</div>
 
 {% endblock %}

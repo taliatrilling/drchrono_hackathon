@@ -147,3 +147,24 @@ def get_patient_id_from_name_dob(fname, lname, dob, access_token):
 		return None
 	return r['results'][0]['id']
 
+def get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token):
+	"""For a given patient, fetch chart information"""
+
+	headers = get_request_headers(access_token)
+	patients_url = 'https://drchrono.com/api/patients'
+	data = {'doctor': doctor_id, 'first_name': first_name, 'last_name': last_name, 'date_of_birth': date_of_birth}
+	r = (requests.get(patients_url, params=data, headers=headers).json())
+	for entry in r['results']:
+		info = {}
+		info['Emergency Contact Number'] = entry['emergency_contact_phone']
+		info['Home Phone Number'] = entry['home_phone']
+		info['Current Address'] = entry['address']
+		info['Email Address'] = entry['email']
+		info['Cell Phone Number'] = entry['cell_phone']
+		info['Preferred Pharmacy'] = entry['default_pharmacy']
+	return info
+
+
+
+
+

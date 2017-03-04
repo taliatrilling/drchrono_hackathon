@@ -11,3 +11,12 @@ class SeeingPatient(forms.Form):
 	appt_id = forms.CharField(widget=forms.HiddenInput())
 	checked_in_at = forms.CharField(widget=forms.HiddenInput())
 	doctor_id = forms.CharField(widget=forms.HiddenInput())
+
+class UpdateInfo(forms.Form):
+	pass
+	current_address = forms.CharField(widget=forms.Textarea)
+	email_address = forms.CharField(widget=forms.Textarea)
+	home_phone = forms.CharField(widget=forms.Textarea)
+	cell_phone = forms.CharField(widget=forms.Textarea)
+	emergency_phone = forms.CharField(widget=forms.Textarea)
+	pref_pharmacy = forms.CharField(widget=forms.Textarea)
