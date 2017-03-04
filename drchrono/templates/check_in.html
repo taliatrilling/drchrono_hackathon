@@ -6,6 +6,15 @@
 
 	<div class="container-fluid">
 
+		{% if messages %}
+		<ul class="messages">
+		    {% for message in messages %}
+		    <br>
+		    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+		    {% endfor %}
+		</ul>
+		{% endif %}
+
 		<h1>Patient Check-In</h1>
 		<form action="/checked-in" method="POST">
 			<label>Please enter your information below to check in for your appointment</label><br>

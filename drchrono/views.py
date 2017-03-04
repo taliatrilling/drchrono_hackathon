@@ -4,6 +4,8 @@ from django.views.generic.base import TemplateView
 
 from django.template import Context
 
+from django.contrib import messages
+
 import requests
 
 from datetime import datetime, timedelta
@@ -53,7 +55,8 @@ def checked_in(request):
 			data = form.cleaned_data
 			patient_id = get_patient_id_from_name_dob(data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token)
 			if patient_id is None:
-				return redirect('/check-in') #error message
+				messages.error(request, 'Your first name, last name or date of birth was inputed incorrectly. Please try again.')
+				return redirect('/check-in') 
 			office_id = get_office_id_for_practice(drchrono_login.access_token)
 			if get_appt_id_for_patient_today(patient_id, drchrono_login.access_token) is None:
 				return redirect('/check-in') #don't have an appt today
@@ -62,17 +65,19 @@ def checked_in(request):
 			data['doctor_id'] = doctor_id
 			appt = get_appt_obj(patient_id, drchrono_login.access_token)
 			if appt is None:
-				return redirect('/check-in') ## error message: no appt today?
-			appt_time = appt['scheduled_time'] #indices to actually get time?
+				messages.error(request, 'You do not have an appointment scheduled for today.')
+				return redirect('/check-in') 
+			appt_time = appt['scheduled_time']
 			today = datetime.now().date().strftime('%Y-%m-%d')
 			if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt_id):
-				return redirect('/check-in') #message that you've already checked in 
+				messages.info(request, 'You have already checked in for this appointment')
+				return redirect('/check-in') 
 			check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
 			appt_time=appt_time)
 			check_in_obj.save()
 			info = {'stats': get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token), 'first_name': data['first_name']}
 			return render(request, 'update_chart.html', context=info)
-	#error message if credentials are incorrect
+	messages.error(request, 'Your first name, last name or date of birth was inputed incorrectly. Please try again.')
 	return redirect('/check-in')
 
 
@@ -117,7 +122,6 @@ def update_chart(request):
 	doctor_id = data['doctor_id']
 	access_token = drchrono_login.access_token
 	info = get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token)
-	print info
 	return render(request, 'update_chart.html', context=info)
 
 def updated_chart(request):
