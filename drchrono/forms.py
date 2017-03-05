@@ -14,9 +14,9 @@ class SeeingPatient(forms.Form):
 	doctor_id = forms.CharField(widget=forms.HiddenInput())
 
 class UpdateInfo(forms.Form):
-	current_address = forms.CharField()
-	email_address = forms.CharField()
-	home_phone = forms.CharField()
-	cell_phone = forms.CharField()
-	emergency_phone = forms.CharField()
-	pref_pharmacy = forms.CharField()
+	current_address = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Current address:', max_length=100)
+	email_address = forms.EmailField(widget=forms.TextInput(attrs={'size':80}), label='Email address:', max_length=100)
+	home_phone = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Home phone number:', max_length=20)
+	cell_phone = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Cell phone number:', max_length=20)
+	emergency_phone = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Emergency contact phone number:', max_length=20)
+	pref_pharmacy = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Preferred pharmacy:', max_length=100)

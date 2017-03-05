@@ -11,20 +11,6 @@
 		<form action="/updated-chart" method="POST"> 
 			{% csrf_token %}
 			{{ form.as_p }}
-<!-- 
-		
-
-					<h3>{% for k, v in stats.items %}
-			{% if v == '' %}
-				{{ k }}:  
-				<textarea rows="1" cols="100" name="{{ k }}">Not on File </textarea><br>
-			{% else %}
-				{{ k }}:
-				<textarea rows="1" cols="100" name="{{ k }}">{{ v }} </textarea><br>
-			{% endif %}
-		
-		{% endfor %}</h3> -->
-
 		<input type="submit">
 		</form>
 	</div>

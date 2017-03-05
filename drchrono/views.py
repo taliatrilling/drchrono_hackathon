@@ -85,9 +85,11 @@ def handle_checked_in_post(request, form):
 	check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
 	appt_time=appt_time, chief_complaint=complaint)
 	check_in_obj.save()
-	form = UpdateInfo()
-	info = {'stats': get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token), 'first_name': data['first_name'], 'form': form}
-
+	stats = get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token)
+	chart = {}
+	for k, v in stats.items():
+		chart[k] = v
+	info = {'first_name': data['first_name'], 'form': UpdateInfo(initial=chart)}
 	return render(request, 'update_chart.html', context=info)
 
 def appt_overview(request, doctor_id):
@@ -122,25 +124,11 @@ def appt_overview(request, doctor_id):
 def update_chart(request):
 	"""Landing page for patients following check-in to see if their chart needs to be updated"""
 
-	drchrono_login = authenticate(request)
-	if not drchrono_login:
-		return render(request, 'error.html')
-	first_name = data['first_name']
-	last_name = data['last_name']
-	date_of_birth = data['dob']
-	doctor_id = data['doctor_id']
-	access_token = drchrono_login.access_token
-	info = get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token)
-	return render(request, 'update_chart.html', context={'info': info})
-
-def updated_chart(request):
-	""" """
-
 	pass
-	
 	# drchrono_login = authenticate(request)
 	# if not drchrono_login:
 	# 	return render(request, 'error.html')
+	# access_token = drchrono_login.access_token
 	# if request.method == 'POST':
 	# 	form = UpdateInfo(request.POST)
 	# 	if form.is_valid():
@@ -148,6 +136,9 @@ def updated_chart(request):
 	# 		for k, v in data.items():
 	# 			if v == 'Not on File':
 	# 				continue
+
+
+	
 
 
 

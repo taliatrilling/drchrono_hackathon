@@ -158,12 +158,15 @@ def get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, acce
 	r = (requests.get(patients_url, params=data, headers=headers).json())
 	for entry in r['results']:
 		info = {}
-		info['Emergency Contact Number'] = entry['emergency_contact_phone']
-		info['Home Phone Number'] = entry['home_phone']
-		info['Current Address'] = entry['address']
-		info['Email Address'] = entry['email']
-		info['Cell Phone Number'] = entry['cell_phone']
-		info['Preferred Pharmacy'] = entry['default_pharmacy']
+		info['emergency_phone'] = entry['emergency_contact_phone']
+		info['home_phone'] = entry['home_phone']
+		info['current_address'] = entry['address']
+		info['email_address'] = entry['email']
+		info['cell_phone'] = entry['cell_phone']
+		info['pref_pharmacy'] = entry['default_pharmacy']
+	for k, v in info.items():
+		if v == '':
+			info[k] = 'Not on File'
 	return info
 
 

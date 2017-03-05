@@ -18,8 +18,6 @@ urlpatterns = [
  	url(r'checked-in', views.checked_in, name='checked-in'),
 
  	url(r'update-chart', views.update_chart, name='update-chart'),
-
- 	url(r'updated-chart', views.updated_chart, name='updated-chart'),
 ]
 
 
