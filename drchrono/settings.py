@@ -58,6 +58,10 @@ AUTHENTICATION_BACKENDS = (
 
 ROOT_URLCONF = 'drchrono.urls'
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
+SESSION_FILE_PATH = '/tmp/talia'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

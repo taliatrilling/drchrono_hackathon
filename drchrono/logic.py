@@ -158,18 +158,27 @@ def get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, acce
 	r = (requests.get(patients_url, params=data, headers=headers).json())
 	for entry in r['results']:
 		info = {}
-		info['emergency_phone'] = entry['emergency_contact_phone']
+		info['emergency_contact_phone'] = entry['emergency_contact_phone']
 		info['home_phone'] = entry['home_phone']
-		info['current_address'] = entry['address']
-		info['email_address'] = entry['email']
+		info['address'] = entry['address']
+		info['email'] = entry['email']
 		info['cell_phone'] = entry['cell_phone']
-		info['pref_pharmacy'] = entry['default_pharmacy']
+		info['default_pharmacy'] = entry['default_pharmacy']
+		info['gender'] = entry['gender']
 	for k, v in info.items():
 		if v == '':
 			info[k] = 'Not on File'
 	return info
 
+def put_new_values_in_chart(new_values, access_token):
+	"""Update a patient's chart"""
 
-
+	headers = get_request_headers(access_token)
+	patients_url = 'https://drchrono.com/api/patients/' + str(new_values['id'])
+	print new_values
+	r = requests.put(patients_url, data=new_values, headers=headers)
+	print r.json()
+	if r.status_code == 200:
+		return True
 
 

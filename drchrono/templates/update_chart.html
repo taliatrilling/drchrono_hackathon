@@ -8,10 +8,10 @@
 
 		<h1>You have been successfully checked in, {{ first_name }}. Please review your chart information below to see if any of your information needs to be updated.</h1>
 
-		<form action="/updated-chart" method="POST"> 
+		<form action="/update-chart" method="POST"> 
 			{% csrf_token %}
 			{{ form.as_p }}
-		<input type="submit">
+		<input type="submit" value="Update Chart/Finish Check-In">
 		</form>
 	</div>
 

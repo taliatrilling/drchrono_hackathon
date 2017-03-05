@@ -16,7 +16,7 @@ from pytz import timezone
 
 from .forms import CheckInForm, SeeingPatient, UpdateInfo
 
-from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info
+from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart
 
 from .models import CheckIn, Visit
 
@@ -89,7 +89,10 @@ def handle_checked_in_post(request, form):
 	chart = {}
 	for k, v in stats.items():
 		chart[k] = v
+	chart['patient_id'] = patient_id
+	chart['doctor_id'] = doctor_id
 	info = {'first_name': data['first_name'], 'form': UpdateInfo(initial=chart)}
+	request.session['chart'] = chart 
 	return render(request, 'update_chart.html', context=info)
 
 def appt_overview(request, doctor_id):
@@ -124,18 +127,42 @@ def appt_overview(request, doctor_id):
 def update_chart(request):
 	"""Landing page for patients following check-in to see if their chart needs to be updated"""
 
-	pass
-	# drchrono_login = authenticate(request)
-	# if not drchrono_login:
-	# 	return render(request, 'error.html')
-	# access_token = drchrono_login.access_token
-	# if request.method == 'POST':
-	# 	form = UpdateInfo(request.POST)
-	# 	if form.is_valid():
-	# 		data = form.cleaned_data
-	# 		for k, v in data.items():
-	# 			if v == 'Not on File':
-	# 				continue
+	drchrono_login = authenticate(request)
+	if not drchrono_login:
+		return render(request, 'error.html')
+	access_token = drchrono_login.access_token
+	if request.method == 'POST':
+		form = UpdateInfo(request.POST)
+		if form.is_valid():
+			original_values = request.session.get('chart')
+			data = form.cleaned_data
+			changes = data.viewitems() - original_values.viewitems()
+			if len(changes) == 0:
+				del request.session['chart']
+				return redirect('/check-in')
+			new_values = {}
+			for change in changes:
+				new_values[change[0]] = change[1]
+			if 'gender' not in new_values:
+				new_values['gender'] = data['gender']
+			new_values['doctor'] = data['doctor_id']
+			new_values['id'] = original_values['patient_id']
+			success = put_new_values_in_chart(new_values, drchrono_login.access_token)
+			if success:
+				messages.info(request, 'Your chart was successfully updated.')
+				del request.session['chart']
+				return redirect('/check-in')
+			else:
+				messages.error(request, 'Your chart failed to update')
+				return redirect('/check-in')
+
+
+
+
+
+	return redirect('/check-in')
+
+
 
 
 	

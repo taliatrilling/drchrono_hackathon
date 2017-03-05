@@ -22,7 +22,7 @@
 					<div class="col-md-10"><b>This patient has not checked in yet</b></div>
 				{% else %}
 					{% if appt.checkin|calculate_wait_time >= 30 %}
-						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b> {{ appt.complaint }}</div><br>
+						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b></div><div class="col-md-5"> {{ appt.complaint }}</div><br>
 						<div class="col-md-10"><b><div class="urgent">Patient has been waiting for {{ appt.checkin|calculate_wait_time }} minutes</div></div></b>
 					{% else %}
 						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b></div> <div class="col-md-5">{{ appt.complaint }}</div><br>
