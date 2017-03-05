@@ -14,6 +14,7 @@ class CheckIn(models.Model):
 	doctor_id = models.IntegerField()
 	check_in_time = models.DateTimeField()
 	appt_time = models.DateTimeField()
+	chief_complaint = models.CharField(max_length=500)
 
 	def __str__(self):
 		western = timezone('US/Pacific')
@@ -28,7 +29,7 @@ class Visit(models.Model):
 	appt_id = models.IntegerField()
 	seen_at = models.DateTimeField()
 	checked_in_at = models.DateTimeField()
-	doctor_id = models.IntegerField(default=123272)
+	doctor_id = models.IntegerField()
 
 	def __str__(self):
 		western = timezone('US/Pacific')

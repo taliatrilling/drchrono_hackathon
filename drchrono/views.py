@@ -14,7 +14,7 @@ import pytz
 
 from pytz import timezone
 
-from .forms import CheckInForm, SeeingPatient
+from .forms import CheckInForm, SeeingPatient, UpdateInfo
 
 from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_appt_id_for_patient_today, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info
 
@@ -52,34 +52,43 @@ def checked_in(request):
 	if request.method == 'POST':
 		form = CheckInForm(request.POST)
 		if form.is_valid():
-			data = form.cleaned_data
-			patient_id = get_patient_id_from_name_dob(data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token)
-			if patient_id is None:
-				messages.error(request, 'Your first name, last name or date of birth was inputed incorrectly. Please try again.')
-				return redirect('/check-in') 
-			office_id = get_office_id_for_practice(drchrono_login.access_token)
-			if get_appt_id_for_patient_today(patient_id, drchrono_login.access_token) is None:
-				return redirect('/check-in') #don't have an appt today
-			appt_id = get_appt_id_for_patient_today(patient_id, drchrono_login.access_token)
-			doctor_id = get_doctor_id_from_appt(appt_id, drchrono_login.access_token)
-			data['doctor_id'] = doctor_id
-			appt = get_appt_obj(patient_id, drchrono_login.access_token)
-			if appt is None:
-				messages.error(request, 'You do not have an appointment scheduled for today.')
-				return redirect('/check-in') 
-			appt_time = appt['scheduled_time']
-			today = datetime.now().date().strftime('%Y-%m-%d')
-			if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt_id):
-				messages.info(request, 'You have already checked in for this appointment')
-				return redirect('/check-in') 
-			check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
-			appt_time=appt_time)
-			check_in_obj.save()
-			info = {'stats': get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token), 'first_name': data['first_name']}
-			return render(request, 'update_chart.html', context=info)
+			return handle_checked_in_post(request, form)
+
 	messages.error(request, 'Your first name, last name or date of birth was inputed incorrectly. Please try again.')
 	return redirect('/check-in')
 
+def handle_checked_in_post(request, form):
+	drchrono_login = authenticate(request)
+	data = form.cleaned_data
+	patient_id = get_patient_id_from_name_dob(data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token)
+	if patient_id is None:
+		messages.error(request, 'Your first name, last name or date of birth was inputed incorrectly. Please try again.')
+		return redirect('/check-in') 
+
+	office_id = get_office_id_for_practice(drchrono_login.access_token)
+	if get_appt_id_for_patient_today(patient_id, drchrono_login.access_token) is None:
+		return redirect('/check-in') #don't have an appt today
+
+	appt_id = get_appt_id_for_patient_today(patient_id, drchrono_login.access_token)
+	doctor_id = get_doctor_id_from_appt(appt_id, drchrono_login.access_token)
+	data['doctor_id'] = doctor_id
+	appt = get_appt_obj(patient_id, drchrono_login.access_token)
+	if appt is None:
+		messages.error(request, 'You do not have an appointment scheduled for today.')
+		return redirect('/check-in') 
+	appt_time = appt['scheduled_time']
+	today = datetime.now().date().strftime('%Y-%m-%d')
+	if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt_id):
+		messages.info(request, 'You have already checked in for this appointment')
+		return redirect('/check-in') 
+	complaint = data['complaint']
+	check_in_obj = CheckIn(appt_id=appt_id, doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
+	appt_time=appt_time, chief_complaint=complaint)
+	check_in_obj.save()
+	form = UpdateInfo()
+	info = {'stats': get_patient_chart_info(doctor_id, data['first_name'], data['last_name'], data['dob'], drchrono_login.access_token), 'first_name': data['first_name'], 'form': form}
+
+	return render(request, 'update_chart.html', context=info)
 
 def appt_overview(request, doctor_id):
 	"""Appointment overview for doctors to view the day's appts as well as wait times"""
@@ -107,7 +116,7 @@ def appt_overview(request, doctor_id):
 	headers = get_request_headers(drchrono_login.access_token)
 	office_id = get_office_id_for_practice(drchrono_login.access_token)
 	appts = get_todays_patients_for_doctor(doctor_id, drchrono_login.access_token)
-	context = {'appts': appts, 'doctor': doctor_id}	
+	context = {'appts': appts, 'doctor': doctor_id, }	
 	return render(request, 'appt_overview.html', context)
 
 def update_chart(request):
@@ -122,7 +131,7 @@ def update_chart(request):
 	doctor_id = data['doctor_id']
 	access_token = drchrono_login.access_token
 	info = get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token)
-	return render(request, 'update_chart.html', context=info)
+	return render(request, 'update_chart.html', context={'info': info})
 
 def updated_chart(request):
 	""" """

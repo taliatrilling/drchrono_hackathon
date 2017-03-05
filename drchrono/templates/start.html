@@ -10,7 +10,7 @@
 
 		{% for doctor in doctors %}
 			{% for key, value in doctor.items %}
-				<h2><a href="/appts/{{ key }}">Dr. {{ value }}</a></h2>
+				<a class='btn btn-primary btn-lg' href="/appts/{{ key }}">Dr. {{ value }}</a>
 			{% endfor %}
 		{% endfor %}
 

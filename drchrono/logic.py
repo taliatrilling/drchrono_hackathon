@@ -131,6 +131,8 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_dict['appt_id'] = entry['id']
 		patient_dict['doctor'] = entry['doctor']
 		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=patient_dict['appt_id'])
+		for item in patient_dict['checkin']:
+			patient_dict['complaint'] = item.chief_complaint
 		if patient_dict['checkin'] is None:
 			patient_dict['checkin'] = []
 		appts.append(patient_dict)
