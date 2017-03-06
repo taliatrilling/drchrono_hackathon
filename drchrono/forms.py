@@ -9,6 +9,10 @@ class CheckInForm(forms.Form):
 	"""
 	first_name = forms.CharField(label='First name:', max_length=50)
 	last_name = forms.CharField(label='Last name:', max_length=50)
+	# month_of_birth = forms.ChoiceField(choices=[(01, 'January'), (02, 'February'), (03, 'March'), (04, 'April'),
+	# 	(05, 'May'), (06, 'June'), (07, 'July'), (08, 'August'), (09, 'September'), (10, 'October'),
+	# 	(11, 'November'), (12, 'December')])
+	# day_of_birth = forms.
 	dob = forms.DateField(widget=forms.widgets.DateInput(format=('%m-%d-%Y')), label='Date of Birth:')
 	complaint = forms.CharField(label='What is the primary reason for your visit?', max_length=500)
 
@@ -56,5 +60,6 @@ class NewAppt(forms.Form):
 	doctor = forms.IntegerField(widget=forms.HiddenInput())
 	scheduled_time = forms.DateTimeField(widget=forms.DateTimeInput(), label='Scheduled date and time')
 	duration = forms.IntegerField(label='Appointment Duration (in minutes):')
+	exam_room = forms.IntegerField(label='Exam room:')
 
 

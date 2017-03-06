@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Update Patient Chart{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<h1>Update Patient Chart</h1>
+		<form action="/chart-as-admin/{{ patient_id }}/{{ doctor_id }}/" method="POST">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Update Chart">
+		</form>
+	</div>
+
+{% endblock %}

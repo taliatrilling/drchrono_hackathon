@@ -29,13 +29,16 @@
 
 				{% if appt.checkin|length == 0 %}
 					<div class="col-md-10"><b>This patient has not checked in yet</b></div>
+					<div class="col-md-5"><a href="/chart-as-admin/{{ appt.patient_id }}/{{ appt.doctor }}">Update this patient's chart</a></div><br>
 				{% else %}
 					{% if appt.checkin|calculate_wait_time >= 30 %}
 						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b></div><div class="col-md-5"> {{ appt.complaint }}</div><br>
 						<div class="col-md-10"><b><div class="urgent">Patient has been waiting for {{ appt.checkin|calculate_wait_time }} minutes</div></div></b>
+						<div class="col-md-5"><a href="/chart-as-admin/{{ appt.patient_id }}/{{ appt.doctor }}">Update this patient's chart</a></div><br>
 					{% else %}
 						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b></div> <div class="col-md-5">{{ appt.complaint }}</div><br>
 						<div class="col-md-10"><b>Patient has been waiting for {{ appt.checkin|calculate_wait_time }} minutes</div></b>
+						<div class="col-md-5"><a href="/chart-as-admin/{{ appt.patient_id }}/{{ appt.doctor }}">Update this patient's chart</a></div><br>
 					{% endif %}
 
 					<input type="hidden" name="seen_at" value="{% now 'c' %}" readonly="readonly">

@@ -18,6 +18,13 @@
 		<h1>Patient Services:</h1>
 		<a class='btn btn-primary btn-lg' href="/check-in">Patient Check-in Kiosk</a>
 
+		<h1>Schedule Appointments</h1>
+		{% for doctor in doctors %}
+			{% for key, value in doctor.items %}
+				<a class='btn btn-primary btn-lg' href="/new-appt/{{ key }}">Schedule an Appointment with Dr. {{ value }}</a>
+			{% endfor %}
+		{% endfor %}
+
 	</div>
 
 {% endblock %}

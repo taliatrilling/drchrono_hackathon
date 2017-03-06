@@ -160,7 +160,7 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_dict['room'] = entry['exam_room']
 		patient_id = entry['patient']
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
-		patient_dict['appt_id'] = entry['id']
+		patient_dict['patient_id'] = entry['patient']
 		patient_dict['doctor'] = entry['doctor']
 		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=patient_dict['appt_id'])
 		for item in patient_dict['checkin']:
@@ -305,6 +305,29 @@ def get_all_patients_for_a_given_doctor(doctor_id, access_token):
 		patient_info['name'] = entry['first_name'] + ' ' + entry['last_name']
 		patients.append(patient_info)
 	return patients
+
+def get_patient_chart_by_doc_and_patient_id(patient_id, doctor_id, access_token):
+	"""
+	"""
+	headers = get_request_headers(access_token)
+	patients_url = 'https://drchrono.com/api/patients'
+	data = {'doctor': doctor_id}
+	r = (requests.get(patients_url, params=data, headers=headers).json())
+	info = {}
+	for entry in r['results']:
+		if entry['id'] == int(patient_id):
+			info['emergency_contact_phone'] = entry['emergency_contact_phone']
+			info['home_phone'] = entry['home_phone']
+			info['address'] = entry['address']
+			info['email'] = entry['email']
+			info['cell_phone'] = entry['cell_phone']
+			info['default_pharmacy'] = entry['default_pharmacy']
+			info['gender'] = entry['gender']
+			for k, v in info.items():
+				if v == '':
+					info[k] = 'Not on File'
+	return info
+
 
 
 

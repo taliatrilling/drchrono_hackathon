@@ -19,7 +19,9 @@ urlpatterns = [
 
  	url(r'update-chart', views.update_chart, name='update-chart'),
 
- 	url(r'new-appt/(?P<doctor_id>[0-9]+)/$', views.add_new_visit, name='new-appt')
+ 	url(r'new-appt/(?P<doctor_id>[0-9]+)/$', views.add_new_visit, name='new-appt'),
+
+ 	url(r'chart-as-admin/(?P<patient_id>[0-9]+)/(?P<doctor_id>[0-9]+)/$', views.admin_update_chart, name='chart-as-admin')
 ]
 
 

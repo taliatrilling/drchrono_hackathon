@@ -14,7 +14,7 @@ import pytz
 
 from .forms import CheckInForm, SeeingPatient, UpdateInfo, NewAppt
 
-from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time, add_new_appt, get_doctor_name_from_id, get_all_patients_for_a_given_doctor
+from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time, add_new_appt, get_doctor_name_from_id, get_patient_chart_by_doc_and_patient_id
 
 from .models import CheckIn, Visit
 
@@ -128,7 +128,6 @@ def update_chart(request):
 	drchrono_login = authenticate(request)
 	if not drchrono_login:
 		return render(request, 'error.html')
-	access_token = drchrono_login.access_token
 	if request.method == 'POST':
 		form = UpdateInfo(request.POST)
 		if form.is_valid():
@@ -153,6 +152,40 @@ def update_chart(request):
 	del request.session['chart']
 	messages.error(request, 'You are using an invalid method to update your chart, please alert your doctor that you need your chart updated.')
 	return redirect('/check-in')
+
+def admin_update_chart(request, patient_id, doctor_id):
+	""" 
+	"""
+
+	drchrono_login = authenticate(request)
+	if not drchrono_login:
+		return render(request, 'error.html')
+	if request.method == 'POST':
+		form = UpdateInfo(request.POST)
+		if form.is_valid():
+			original_values = request.session.get('chart_info')
+			data = form.cleaned_data
+			if compare_old_to_new_chart(original_values, data):
+				new_values = compare_old_to_new_chart(original_values, data)
+				print new_values
+				success = put_new_values_in_chart(new_values, drchrono_login.access_token)
+				if success:
+					messages.info(request, 'Your chart was successfully updated.')
+					del request.session['chart_info']
+					return redirect('/appts/' + str(doctor_id))
+				else:
+					messages.error(request, 'Your chart failed to update')
+					del request.session['chart_info']
+					return redirect('/appts/' + str(doctor_id))
+			return redirect('/appts/' + str(doctor_id))
+		del request.session['chart_info']
+		messages.error(request, 'You are using an invalid method to update this chart.')
+		return redirect('/appts/' + str(doctor_id))
+	chart_info = get_patient_chart_by_doc_and_patient_id(patient_id, doctor_id, drchrono_login.access_token)
+	chart_info['doctor_id'] = doctor_id
+	chart_info['patient_id'] = patient_id
+	request.session['chart_info'] = chart_info
+	return render(request, 'admin_update_chart.html', context={'form': UpdateInfo(initial=chart_info), 'patient_id': patient_id, 'doctor_id': doctor_id})
 
 def add_new_visit(request, doctor_id):
 	"""
