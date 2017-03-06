@@ -18,6 +18,8 @@ urlpatterns = [
  	url(r'checked-in', views.checked_in, name='checked-in'),
 
  	url(r'update-chart', views.update_chart, name='update-chart'),
+
+ 	url(r'new-appt/(?P<doctor_id>[0-9]+)/$', views.add_new_visit, name='new-appt')
 ]
 
 

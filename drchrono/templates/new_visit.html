@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}New Appointment{% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid">
+
+		{% if messages %}
+		<ul class="messages">
+		    {% for message in messages %}
+		    <br>
+		    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+		    {% endfor %}
+		</ul>
+		{% endif %}
+
+		{% for patient in patients %}
+			{{ patient }}
+		{% endfor % }
+
+		<h1>Schedule a new appointment for Dr. {{ doc_name }}</h1>
+		<form action='new-appt/{{ doctor_id }}' method='POST'>
+			{% csrf_token %}
+			{{ form.as_p }}
+		<input type='submit' value='Add Appointment'
+
+		</form>
+
+	</div>
+
+{% endblock %}

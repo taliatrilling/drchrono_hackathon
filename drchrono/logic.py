@@ -4,8 +4,6 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from datetime import datetime
 
-from datetime import datetime
-
 import pytz
 
 from .models import CheckIn, Visit
@@ -260,11 +258,56 @@ def format_check_in_time(naive_unformated_dt):
 	return checked_in_at
 
 
-def add_new_appt(patient_id, doctor_id, appt_time, duration, exam_room, access_token):
+def add_new_appt(patient_id, doctor_id, appt_time, duration_in_min, exam_room, access_token):
 	""" 
+
+	Function to allow a doctor (or other administrator) to add an appt
 
 	"""
 
-	pass
+	headers = get_request_headers(access_token)
+	appts_url = 'https://drchrono.com/api/appointments' 
+	appt_time_ISO = appt_time.isoformat()
+	data = {'doctor': doctor_id, 'patient': patient_id, 'duration': duration_in_min, 'exam_room': exam_room, 
+	'scheduled_time': appt_time_ISO}
+	r = requests.post(appts_url, data=data, headers=headers)
+	if r.status_code == 200 or r.status_code == 204:
+		return True
+
+def get_doctor_name_from_id(doctor_id, access_token):
+	"""
+
+	For a given doctor id at the authenticated practice, return the doctor's last name
+
+	"""
+
+	docs = get_doctors_for_practice(access_token)
+	for doc in docs:
+		print doc
+		if int(doctor_id) in doc:
+			return doc[int(doctor_id)]
+
+def get_all_patients_for_a_given_doctor(doctor_id, access_token):
+	"""
+
+	For a given doctor id, return a list of patient dictionaries (patient_id and full name)
+
+	"""
+
+	headers = get_request_headers(access_token)
+	patients_url = 'https://drchrono.com/api/patients'
+	data = {'doctor': doctor_id}
+	r = (requests.get(patients_url, params=data, headers=headers)).json()
+	patients = []
+	for entry in r['results']:
+		patient_info = {}
+		patient_info['id'] = entry['id']
+		patient_info['name'] = entry['first_name'] + ' ' + entry['last_name']
+		patients.append(patient_info)
+	return patients
+
+
+
+
 
 

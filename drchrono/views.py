@@ -12,9 +12,9 @@ from datetime import datetime #timedelta
 
 import pytz
 
-from .forms import CheckInForm, SeeingPatient, UpdateInfo
+from .forms import CheckInForm, SeeingPatient, UpdateInfo, NewAppt
 
-from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time
+from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time, add_new_appt, get_doctor_name_from_id, get_all_patients_for_a_given_doctor
 
 from .models import CheckIn, Visit
 
@@ -33,8 +33,7 @@ def start(request):
 		return render(request, 'error.html')
 
 	doctors = get_doctors_for_practice(drchrono_login.access_token)
-	context = {'doctors': doctors, 'drchrono_login': drchrono_login}
-	return render(request, 'start.html', context)
+	return render(request, 'start.html', context={'doctors': doctors, 'drchrono_login': drchrono_login})
 
 
 def check_in(request):
@@ -155,4 +154,20 @@ def update_chart(request):
 	messages.error(request, 'You are using an invalid method to update your chart, please alert your doctor that you need your chart updated.')
 	return redirect('/check-in')
 
+def add_new_visit(request, doctor_id):
+	"""
+	"""
+
+	drchrono_login = authenticate(request)
+	if not drchrono_login:
+		return render(request, 'error.html')
+	if request.method == 'POST':
+		pass
+	patients = [(x['id'], x['name']) for x in get_all_patients_for_a_given_doctor(doctor_id, drchrono_login.access_token)]
+	form = NewAppt(patients, initial={'doctor': doctor_id})
+	doc_name = get_doctor_name_from_id(doctor_id, drchrono_login.access_token)
+	return render(request, 'new_visit.html', context={'form': form, 'doc_name': doc_name, 'doctor_id': doctor_id})
+
+def update_chart_as_admin(request):
+	pass
 

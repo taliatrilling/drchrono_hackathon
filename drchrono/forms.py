@@ -20,9 +20,9 @@ class SeeingPatient(forms.Form):
 
 	"""
 	seen_at = forms.CharField(widget=forms.HiddenInput())
-	appt_id = forms.CharField(widget=forms.HiddenInput())
+	appt_id = forms.IntegerField(widget=forms.HiddenInput())
 	checked_in_at = forms.CharField(widget=forms.HiddenInput())
-	doctor_id = forms.CharField(widget=forms.HiddenInput())
+	doctor_id = forms.IntegerField(widget=forms.HiddenInput())
 
 class UpdateInfo(forms.Form):
 	""" 
@@ -38,4 +38,23 @@ class UpdateInfo(forms.Form):
 	default_pharmacy = forms.CharField(widget=forms.TextInput(attrs={'size':80}), label='Preferred pharmacy:', max_length=100)
 	gender = forms.ChoiceField(choices=[('Female', 'Female'), ('Male', 'Male'), ('Other', 'Other')], label='Gender:')
 	doctor_id = forms.IntegerField(widget=forms.HiddenInput())
+
+
+class NewAppt(forms.Form):
+	"""
+
+	Add a new appointment for a particular patient. For admin/doctor use only
+
+
+	"""
+
+	def __init__(self, patients, *args, **kwargs):
+		super(NewAppt, self).__init__(*args, **kwargs)
+		self.fields['patient'].choices = patients
+
+	patient = forms.ChoiceField(choices=())
+	doctor = forms.IntegerField(widget=forms.HiddenInput())
+	scheduled_time = forms.DateTimeField(widget=forms.DateTimeInput(), label='Scheduled date and time')
+	duration = forms.IntegerField(label='Appointment Duration (in minutes):')
+
 
