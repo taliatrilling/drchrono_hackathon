@@ -92,7 +92,7 @@ def get_appt_obj(patient_id, access_token):
 	today = datetime.now().date().strftime('%Y-%m-%d')
 	headers = get_request_headers(access_token)
 	appts_url = 'https://drchrono.com/api/appointments' 
-	data = {'date': today}
+	data = {'date': today, 'patient': patient_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
 	for entry in r['results']:
 		return entry

@@ -14,7 +14,7 @@ import pytz
 
 from .forms import CheckInForm, SeeingPatient, UpdateInfo, NewAppt
 
-from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time, add_new_appt, get_doctor_name_from_id, get_patient_chart_by_doc_and_patient_id
+from .logic import authenticate, get_request_headers, get_name_from_patient_id, get_patient_obj_from_id, get_office_id_for_practice, get_appt_obj, get_doctor_id_from_appt, get_doctors_for_practice, get_todays_patients_for_doctor, get_patient_id_from_name_dob, get_patient_chart_info, put_new_values_in_chart, compare_old_to_new_chart, format_check_in_time, add_new_appt, get_doctor_name_from_id, get_patient_chart_by_doc_and_patient_id, get_all_patients_for_a_given_doctor
 
 from .models import CheckIn, Visit
 
@@ -72,7 +72,7 @@ def checked_in(request):
 			appt = get_appt_obj(patient_id, drchrono_login.access_token)
 			doctor_id = get_doctor_id_from_appt(appt['id'], drchrono_login.access_token)
 			today = datetime.now().date().strftime('%Y-%m-%d')
-			if CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=appt['id']): #checking to see if the database already has an obj for their check in
+			if CheckIn.objects.filter(appt_time__icontains=today).filter(appt_id__exact=appt['id']): #checking to see if the database already has an obj for their check in
 				messages.info(request, 'You have already checked in for this appointment')
 				return redirect('/check-in') 
 			check_in_obj = CheckIn(appt_id=appt['id'], doctor_id=doctor_id, check_in_time=pytz.utc.localize(datetime.now()),
@@ -135,7 +135,6 @@ def update_chart(request):
 			data = form.cleaned_data
 			if compare_old_to_new_chart(original_values, data):
 				new_values = compare_old_to_new_chart(original_values, data)
-				print new_values
 				success = put_new_values_in_chart(new_values, drchrono_login.access_token)
 				if success:
 					messages.info(request, 'Your chart was successfully updated.')
@@ -155,6 +154,9 @@ def update_chart(request):
 
 def admin_update_chart(request, patient_id, doctor_id):
 	""" 
+
+	Update patient chart as admin -- can be accessed repeatedly, not reliant on check-in like other update chart view
+
 	"""
 
 	drchrono_login = authenticate(request)
@@ -167,7 +169,6 @@ def admin_update_chart(request, patient_id, doctor_id):
 			data = form.cleaned_data
 			if compare_old_to_new_chart(original_values, data):
 				new_values = compare_old_to_new_chart(original_values, data)
-				print new_values
 				success = put_new_values_in_chart(new_values, drchrono_login.access_token)
 				if success:
 					messages.info(request, 'Your chart was successfully updated.')
