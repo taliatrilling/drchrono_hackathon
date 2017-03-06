@@ -4,10 +4,19 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from datetime import datetime
 
+from datetime import datetime
+
+import pytz
+
 from .models import CheckIn, Visit
 
+
 def authenticate(request):
-	"""Authentication"""
+	"""
+
+	Authentication via OAuth Social Auth
+
+	"""
 	
 	user = request.user
 	try:
@@ -19,14 +28,22 @@ def authenticate(request):
 	return drchrono_login
 
 def get_request_headers(access_token):
-	"""Takes in access token from OAuth, formats for API request headers"""
+	"""
+
+	Takes in access token from OAuth, formats for API request headers
+
+	"""
 
 	access_token_auth = 'Bearer ' + str(access_token)
 	headers = {'Authorization': access_token_auth}
 	return headers
 
 def get_name_from_patient_id(patient_id, access_token):
-	"""For a patient id, returns the patient's full name in string form"""
+	"""
+
+	For a patient id, returns the patient's full name in string form
+
+	"""
 
 	url = 'https://drchrono.com/api/patients_summary'
 	access_token_auth = 'Bearer ' + access_token
@@ -37,7 +54,11 @@ def get_name_from_patient_id(patient_id, access_token):
 			return (str(entry['first_name']) + ' ' + str(entry['last_name']))
 
 def get_patient_obj_from_id(patient_id, access_token):
-	"""For a patient id, returns the full patient object from the API database"""
+	"""
+
+	For a patient id, returns the full patient object from the API database
+
+	"""
 
 	url = 'https://drchrono.com/api/patients_summary'
 	access_token_auth = 'Bearer ' + access_token
@@ -48,7 +69,11 @@ def get_patient_obj_from_id(patient_id, access_token):
 			return entry
 
 def get_office_id_for_practice(access_token):
-	"""For a practice that has granted the application access, return the office id"""
+	"""
+
+	For a practice that has granted the application access, return the office id
+
+	"""
 
 	#ask: can a practice have multiple office ids? how would this change the code?
 
@@ -60,7 +85,11 @@ def get_office_id_for_practice(access_token):
 	return office_id
 
 def get_appt_obj(patient_id, access_token):
-	"""For a patient id, get the full appt object for their appt scheduled for today"""
+	"""
+
+	For a patient id, get the full appt object for their appt scheduled for today
+
+	"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
 	headers = get_request_headers(access_token)
@@ -71,7 +100,11 @@ def get_appt_obj(patient_id, access_token):
 		return entry
 
 def get_doctor_id_from_appt(appt_id, access_token):
-	"""For a given appt id, return the id of the doctor who is scheduled to attend to that appt"""
+	"""
+
+	For a given appt id, return the id of the doctor who is scheduled to attend to that appt
+
+	"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
 	headers = get_request_headers(access_token)
@@ -83,8 +116,12 @@ def get_doctor_id_from_appt(appt_id, access_token):
 			return entry['doctor']
 
 def get_doctors_for_practice(access_token):
-	"""For a practice that has given the application access, return a list of doctors that is a dictionary of 
-	their ids as well as last names"""
+	"""
+
+	For a practice that has given the application access, return a list of doctors that is a dictionary of 
+	their ids as well as last names
+
+	"""
 
 	headers = get_request_headers(access_token)
 	doctors_url = 'https://drchrono.com/api/doctors'
@@ -97,8 +134,12 @@ def get_doctors_for_practice(access_token):
 	return doctors
 
 def get_todays_patients_for_doctor(doctor_id, access_token):
-	"""For today's date and a given doctor id, returns a list of appointments -- each list element
-	contains a dictionary of information relevant to the appt"""
+	"""
+
+	For today's date and a given doctor id, returns a list of appointments -- each list element
+	contains a dictionary of information relevant to the appt
+
+	"""
 
 	today = datetime.now().date().strftime('%Y-%m-%d')
 	headers = get_request_headers(access_token)
@@ -116,7 +157,6 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		if int(entry['id']) in seen_ids:
 			continue
 		patient_dict['appt_id'] = entry['id']
-		print patient_dict['appt_id']
 		patient_dict['time'] = entry['scheduled_time']
 		patient_dict['duration'] = entry['duration']
 		patient_dict['room'] = entry['exam_room']
@@ -133,7 +173,11 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 	return appts
 
 def get_patient_id_from_name_dob(fname, lname, dob, access_token):
-	"""For a given first name, last name and DOB, return the patient_id or None if inputs invalid"""
+	"""
+
+	For a given first name, last name and DOB, return the patient_id or None if inputs invalid
+
+	"""
 	
 	headers = get_request_headers(access_token)
 	patients_url = 'https://drchrono.com/api/patients_summary'
@@ -144,7 +188,11 @@ def get_patient_id_from_name_dob(fname, lname, dob, access_token):
 	return r['results'][0]['id']
 
 def get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, access_token):
-	"""For a given patient, fetch chart information"""
+	"""
+
+	For a given patient, fetch chart information
+
+	"""
 
 	headers = get_request_headers(access_token)
 	patients_url = 'https://drchrono.com/api/patients'
@@ -165,13 +213,58 @@ def get_patient_chart_info(doctor_id, first_name, last_name, date_of_birth, acce
 	return info
 
 def put_new_values_in_chart(new_values, access_token):
-	"""Update a patient's chart"""
+	"""
+
+	Update a patient's chart
+
+	"""
 
 	headers = get_request_headers(access_token)
 	patients_url = 'https://drchrono.com/api/patients/' + str(new_values['id'])
-	print new_values
 	r = requests.put(patients_url, data=new_values, headers=headers)
-	if r.status_code == 200:
+	if r.status_code == 200 or r.status_code == 204:
 		return True
+
+def compare_old_to_new_chart(old_chart, new_chart):
+	"""
+
+	Compare old to new chart, if no differences, returns None, if differences, returns a valid new dict to use for pushing to API
+
+	"""
+
+	changes = new_chart.viewitems() - old_chart.viewitems()
+	if len(changes) != 0:
+		new_values = {}
+		for change in changes:
+			new_values[change[0]] = change[1]
+		if 'gender' not in new_values:
+			new_values['gender'] = old_chart['gender']
+		new_values['doctor'] = old_chart['doctor_id']
+		new_values['id'] = old_chart['patient_id']
+		return new_values
+
+def format_check_in_time(naive_unformated_dt): 
+	"""
+
+	For a naive, unformated date/time, formats it so that it can be inputed as a datetime in UTC format
+
+	"""
+
+	checked_in_not_formatted = naive_unformated_dt[0:20]
+	if checked_in_not_formatted[7] == ',':
+		checked_in_not_formatted = checked_in_not_formatted[0:6] + '0' + checked_in_not_formatted[6:]
+	if checked_in_not_formatted[16] == ':':
+		checked_in_not_formatted = checked_in_not_formatted[0:16] + '0' + checked_in_not_formatted[16:]
+	checked_in_at = datetime.strptime(checked_in_not_formatted, '%B %d, %Y, %I:%M')
+	checked_in_at = pytz.utc.localize(checked_in_at)
+	return checked_in_at
+
+
+def add_new_appt(patient_id, doctor_id, appt_time, duration, exam_room, access_token):
+	""" 
+
+	"""
+
+	pass
 
 

@@ -6,6 +6,15 @@
 
 	<div class="container-fluid">
 
+		{% if messages %}
+		<ul class="messages">
+		    {% for message in messages %}
+		    <br>
+		    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+		    {% endfor %}
+		</ul>
+		{% endif %}
+
 		<h1>Today's Schedule   <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span></h1>
 			{% load drchrono_extras %}
 			{% for appt in appts %}
@@ -28,10 +37,12 @@
 						<div class="col-md-5"><b>Patient listed their primary reason for visiting as:</b></div> <div class="col-md-5">{{ appt.complaint }}</div><br>
 						<div class="col-md-10"><b>Patient has been waiting for {{ appt.checkin|calculate_wait_time }} minutes</div></b>
 					{% endif %}
+
 					<input type="hidden" name="seen_at" value="{% now 'c' %}" readonly="readonly">
 					<input type="hidden" name="checked_in_at" value="{{ appt.checkin.0.check_in_time }}" readonly="readonly">
 					<input type="hidden" name="appt_id" value="{{ appt.appt_id }}" readonly="readonly">
 					<input type="hidden" name="doctor_id" value="{{ appt.doctor }}" readonly="readonly">
+
 					<br><br><div class="col-md-10"><input type="submit" value="I am starting this appointment"></div>
 				{% endif %}
 				</div>
