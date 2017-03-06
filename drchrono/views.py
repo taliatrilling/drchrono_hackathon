@@ -202,6 +202,3 @@ def add_new_visit(request, doctor_id):
 	doc_name = get_doctor_name_from_id(doctor_id, drchrono_login.access_token)
 	return render(request, 'new_visit.html', context={'form': form, 'doc_name': doc_name, 'doctor_id': doctor_id})
 
-def update_chart_as_admin(request):
-	pass
-

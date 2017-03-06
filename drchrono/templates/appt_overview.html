@@ -21,7 +21,6 @@
 			<form action="/appts/{{ appt.doctor }}/" method="POST">
 				{% csrf_token %}
 				<div class="row">
-					{{ appt.appt_id }}
 					<div class="container jumbotron col-md-9">
 					<div class="col-md-5"><b>Patient name:</b></div> <div class="col-md-5">{{ appt.name }}</div><br>
 					<div class="col-md-5"><b>Appointment scheduled for:</b></div> <div class="col-md-5">{{ appt.time|slice:"11:" }}</div><br>
@@ -51,7 +50,7 @@
 				{% endif %}
 				</div>
 			</div>
-				<br><br>
+				<br>
 			{% endfor %}
 		</form>
 		<h1>Today's average wait time for patients is: {{ doctor|get_today_avg_waittime }} minutes</h1>
