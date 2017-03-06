@@ -4,7 +4,7 @@ from django import forms
 class CheckInForm(forms.Form):
 	first_name = forms.CharField(label='First name:', max_length=50)
 	last_name = forms.CharField(label='Last name:', max_length=50)
-	dob = forms.DateField(label='Date of Birth:')
+	dob = forms.DateField(widget=forms.widgets.DateInput(format=('%m-%d-%Y')), label='Date of Birth:')
 	complaint = forms.CharField(label='What is the primary reason for your visit?', max_length=500)
 
 class SeeingPatient(forms.Form):

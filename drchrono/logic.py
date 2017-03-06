@@ -70,12 +70,6 @@ def get_appt_obj(patient_id, access_token):
 	for entry in r['results']:
 		return entry
 
-def get_appt_id_for_patient_today(patient_id, access_token):
-	"""For a patient id, return appt id for an appt scheduled for today"""
-
-	obj = get_appt_obj(patient_id, access_token)
-	return obj['id']
-
 def get_doctor_id_from_appt(appt_id, access_token):
 	"""For a given appt id, return the id of the doctor who is scheduled to attend to that appt"""
 
@@ -177,7 +171,6 @@ def put_new_values_in_chart(new_values, access_token):
 	patients_url = 'https://drchrono.com/api/patients/' + str(new_values['id'])
 	print new_values
 	r = requests.put(patients_url, data=new_values, headers=headers)
-	print r.json()
 	if r.status_code == 200:
 		return True
 

@@ -60,7 +60,7 @@ ROOT_URLCONF = 'drchrono.urls'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 
-SESSION_FILE_PATH = '/tmp/talia'
+SESSION_FILE_PATH = './sessions'
 
 TEMPLATES = [
     {
