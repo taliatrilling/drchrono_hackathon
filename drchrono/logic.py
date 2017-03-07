@@ -145,7 +145,7 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 	office_id = get_office_id_for_practice(access_token)
 	data = {'doctor': doctor_id, 'date': today, 'office': office_id}
 	r = (requests.get(appts_url, params=data, headers=headers)).json()
-	patients_already_seen = Visit.objects.all().filter(checked_in_at__icontains=today)
+	patients_already_seen = Visit.objects.filter(checked_in_at__icontains=today)
 	seen_ids = []
 	appts = []
 	for p in patients_already_seen:
@@ -162,7 +162,7 @@ def get_todays_patients_for_doctor(doctor_id, access_token):
 		patient_dict['name'] = get_name_from_patient_id(patient_id, access_token)
 		patient_dict['patient_id'] = entry['patient']
 		patient_dict['doctor'] = entry['doctor']
-		patient_dict['checkin'] = CheckIn.objects.all().filter(appt_time__icontains=today, appt_id=patient_dict['appt_id'])
+		patient_dict['checkin'] = CheckIn.objects.filter(appt_time__icontains=today, appt_id=patient_dict['appt_id'])
 		for item in patient_dict['checkin']:
 			patient_dict['complaint'] = item.chief_complaint
 		if patient_dict['checkin'] is None:
@@ -273,6 +273,8 @@ def add_new_appt(patient_id, doctor_id, appt_time, duration_in_min, exam_room, a
 	r = requests.post(appts_url, data=data, headers=headers)
 	if r.status_code == 200 or r.status_code == 204:
 		return True
+	if r.status_code == 409:
+		return 'taken'
 
 def get_doctor_name_from_id(doctor_id, access_token):
 	"""
@@ -283,7 +285,6 @@ def get_doctor_name_from_id(doctor_id, access_token):
 
 	docs = get_doctors_for_practice(access_token)
 	for doc in docs:
-		print doc
 		if int(doctor_id) in doc:
 			return doc[int(doctor_id)]
 
@@ -308,6 +309,9 @@ def get_all_patients_for_a_given_doctor(doctor_id, access_token):
 
 def get_patient_chart_by_doc_and_patient_id(patient_id, doctor_id, access_token):
 	"""
+
+	Get patient chart info from doctor and patient ids (rather than demographic info)
+
 	"""
 	headers = get_request_headers(access_token)
 	patients_url = 'https://drchrono.com/api/patients'

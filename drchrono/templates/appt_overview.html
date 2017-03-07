@@ -25,7 +25,7 @@
 					<div class="col-md-5"><b>Patient name:</b></div> <div class="col-md-5">{{ appt.name }}</div><br>
 					<div class="col-md-5"><b>Appointment scheduled for:</b></div> <div class="col-md-5">{{ appt.time|slice:"11:" }}</div><br>
 					<div class="col-md-5"><b>Appointment duration:</b></div> <div class="col-md-5">{{ appt.duration }} minutes</div><br>
-					<div class="col-md-5"><b>Scheduled room:</b></div> <div class="col-md-5">{{ appt.scheduled_room }}</div><br>
+					<div class="col-md-5"><b>Scheduled room:</b></div> <div class="col-md-5">Room {{ appt.room }}</div><br>
 
 				{% if appt.checkin|length == 0 %}
 					<div class="col-md-10"><b>This patient has not checked in yet</b></div>

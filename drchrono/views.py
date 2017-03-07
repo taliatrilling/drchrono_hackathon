@@ -149,7 +149,7 @@ def update_chart(request):
 		messages.error(request, 'Your new chart data was entered in an invalid way, please alert your doctor that you need your chart updated.')
 		return redirect('/check-in')
 	del request.session['chart']
-	messages.error(request, 'You are using an invalid method to update your chart, please alert your doctor that you need your chart updated.')
+	messages.error(request, 'You added data in an improper format, please alert your doctor that you need your chart updated.')
 	return redirect('/check-in')
 
 def admin_update_chart(request, patient_id, doctor_id):
@@ -171,7 +171,7 @@ def admin_update_chart(request, patient_id, doctor_id):
 				new_values = compare_old_to_new_chart(original_values, data)
 				success = put_new_values_in_chart(new_values, drchrono_login.access_token)
 				if success:
-					messages.info(request, 'Your chart was successfully updated.')
+					messages.info(request, "Patient's chart was successfully updated.")
 					del request.session['chart_info']
 					return redirect('/appts/' + str(doctor_id))
 				else:
@@ -180,7 +180,7 @@ def admin_update_chart(request, patient_id, doctor_id):
 					return redirect('/appts/' + str(doctor_id))
 			return redirect('/appts/' + str(doctor_id))
 		del request.session['chart_info']
-		messages.error(request, 'You are using an invalid method to update this chart.')
+		messages.error(request, 'You have added information in an invalid format, please try again.')
 		return redirect('/appts/' + str(doctor_id))
 	chart_info = get_patient_chart_by_doc_and_patient_id(patient_id, doctor_id, drchrono_login.access_token)
 	chart_info['doctor_id'] = doctor_id
@@ -190,13 +190,26 @@ def admin_update_chart(request, patient_id, doctor_id):
 
 def add_new_visit(request, doctor_id):
 	"""
+
+	Add a new visit for one of a given doctor's patients
+
 	"""
 
 	drchrono_login = authenticate(request)
 	if not drchrono_login:
 		return render(request, 'error.html')
-	if request.method == 'POST':
-		pass
+	# if request.method == 'POST':
+	# 	patients = [(x['id'], x['name']) for x in get_all_patients_for_a_given_doctor(doctor_id, drchrono_login.access_token)]
+	# 	form = NewAppt(request.POST, patients)
+	# 	print form.has_error
+	# 	if form.is_valid():
+	# 		print "yay"
+	# 		data = form.cleaned_data
+	# 		return redirect('/start')
+	# 		# success = add_new_appt(patient_id, doctor_id, appt_time, duration_in_min, exam_room, access_token)
+	# 	else: 
+	# 		print 1
+	# 		print form.errors
 	patients = [(x['id'], x['name']) for x in get_all_patients_for_a_given_doctor(doctor_id, drchrono_login.access_token)]
 	form = NewAppt(patients, initial={'doctor': doctor_id})
 	doc_name = get_doctor_name_from_id(doctor_id, drchrono_login.access_token)

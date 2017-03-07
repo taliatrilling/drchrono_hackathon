@@ -16,10 +16,10 @@
 		{% endif %}
 
 		<h1>Schedule a new appointment with Dr. {{ doc_name }}</h1>
-		<form action='new-appt/{{ doctor_id }}' method='POST'>
+		<form action="/new-appt/{{ doctor_id }}/" method="POST">
 			{% csrf_token %}
 			{{ form.as_p }}
-		<input type='submit' value='Add Appointment'
+		<input type="submit" value="Add Appointment">
 
 		</form>
 
